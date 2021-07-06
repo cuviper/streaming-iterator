@@ -574,6 +574,26 @@ pub trait StreamingIteratorMut: StreamingIterator {
     {
         MapDerefMut { it: self, f }
     }
+
+    /// Returns a mutable reference to the first element of the iterator that satisfies the predicate.
+    #[inline]
+    fn find_mut<F>(&mut self, mut f: F) -> Option<&mut Self::Item>
+    where
+        Self: Sized,
+        F: FnMut(&Self::Item) -> bool,
+    {
+        loop {
+            self.advance();
+            match self.get() {
+                Some(i) => if f(i) {
+                    break;
+                },
+                None => break,
+            }
+        }
+
+        (*self).get_mut()
+    }
 }
 
 impl<'a, I: ?Sized> StreamingIteratorMut for &'a mut I
